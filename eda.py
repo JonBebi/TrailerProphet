@@ -43,14 +43,14 @@ df_movies[df_movies['like_percent']<20].plot.scatter(x='avg_sentiment',y='freshn
 ############################
 ### Train Test Split #######
 ############################
-y = df_movies['freshness']
-X = df_movies.drop(columns=['freshness','movie','total_likes','total_replies','total_retweets'])
+y = new['freshness']
+X = new.drop(columns=['freshness','movie','total_likes','total_replies','total_retweets'])
 # X_scaled = StandardScaler().fit_transform(df.drop(columns=['movie','tweet','reply_to','retweet_date']))
 # y = df['rt_scores']
 # X = df.drop(columns=['tweet','rt_scores','movie','reply_to','retweet_date'])
 xTrain,xTest,yTrain,yTest = train_test_split(X,y,test_size=.5,random_state=3)
 
-
+new.head()
 #########################
 ## Logistic Regression ##
 #########################
@@ -70,7 +70,7 @@ precision_score(yTest,y_pred)
 from sklearn.model_selection import cross_val_score
 from sklearn.svm import SVC
 
-clf = svm.SVC(kernel='linear',C=1)
+clf = SVC(kernel='linear',C=1)
 scores = cross_val_score(clf, X, y, cv=5)
 scores.mean()
 clf.fit(xTrain,yTrain)
