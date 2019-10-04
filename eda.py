@@ -7,27 +7,54 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set_style('darkgrid')
 
-df_movies.head(20)
+from sklearn.decomposition import PCA
+pca = PCA(n_components=3)
+pca_data = pca.fit_transform(X)
+df_pca = pd.DataFrame(data=pca_data,columns=['PC1','PC2','PC3'])
+result_df = pd.concat([df_pca, y],axis=1)
 
-df_movies[df_movies['freshness']==0].corr()
+import numpy as np
+plt.scatter(pca_data[:,0],pca_data[:,1])
+
+sns.barplot(pca.explained_variance_ratio_,df_movies.columns)
+plt.plot(np.cumsum(pca.explained_variance_ratio_))
+
+score_rt = []
+for m in tqdm(df['movie']):
+    if m in list(rt_dict.keys()):
+        score_rt.append(rt_dict[m])
+    else:
+        score_rt.append(1)
+df['rt_score'] = score_rt
+df_movies.corr()
+
+
 
 df_movies['like_percent'] = df_movies['total_likes'] / df_movies['total tweets']
 df_movies['reply_percent'] = df_movies['total_replies'] / df_movies['total tweets']
 df_movies['retweet_percet'] = df_movies['total_retweets'] / df_movies['total tweets']
 
-df_movies[df_movies['avg_sentiment']!=0].drop(columns=['total_likes','total_replies','total_retweets']).sort_values(by='like_percent')
+df_movies[df_movies['avg_sentiment']!=0].drop(columns=['total_likes','total_replies','total_retweets']).sort_values(by='total tweets')
+
+df_movies.corr()
+
+df.columns
+df_movies[df_movies['like_percent']<20].plot.scatter(x='avg_sentiment',y='freshness')
 ############################
 ### Train Test Split #######
 ############################
 y = df_movies['freshness']
 X = df_movies.drop(columns=['freshness','movie','total_likes','total_replies','total_retweets'])
-X_scaled = StandardScaler().fit_transform(X)
-xTrain,xTest,yTrain,yTest = train_test_split(X,y,test_size=.3,random_state=10)
+# X_scaled = StandardScaler().fit_transform(df.drop(columns=['movie','tweet','reply_to','retweet_date']))
+# y = df['rt_scores']
+# X = df.drop(columns=['tweet','rt_scores','movie','reply_to','retweet_date'])
+xTrain,xTest,yTrain,yTest = train_test_split(X,y,test_size=.5,random_state=3)
+
 
 #########################
 ## Logistic Regression ##
 #########################
-lr = LogisticRegression(class_weight='balanced',random_state=10)
+lr = LogisticRegression(class_weight='balanced',random_state=5)
 lr.fit(xTrain,yTrain)
 y_pred = lr.predict(xTest)
 
@@ -37,41 +64,19 @@ f1_score(yTest,y_pred)
 recall_score(yTest,y_pred)
 precision_score(yTest,y_pred)
 
+################################
+########## ~ S V M ~ ###########
+################################
+from sklearn.model_selection import cross_val_score
+from sklearn.svm import SVC
 
-### From Learn.co for reference
-###################
-# Now let's compare a few different regularization performances on the dataset:
-weights = [None, 'balanced', {1:2, 0:1}, {1:10, 0:1}, {1:100, 0:1}, {1:1000, 0:1}]
-names = ['None', 'Balanced', '2 to 1', '10 to 1', '100 to 1', '1000 to 1']
-colors = sns.color_palette("Set2")
-
-plt.figure(figsize=(10,8))
-
-for n, weight in enumerate(weights):
-    #Fit a model
-    logreg = LogisticRegression(fit_intercept = False, C = 1e12, class_weight=weight,solver='lbfgs') #Starter code
-    model_log = logreg.fit(X_train, y_train)
-    print(model_log) #Preview model params
-
-    #Predict
-    y_hat_test = logreg.predict(X_test)
-
-    y_score = logreg.fit(X_train, y_train).decision_function(X_test)
-
-    fpr, tpr, thresholds = roc_curve(y_test, y_score)
-
-    print('AUC for {}: {}'.format(names[n], auc(fpr, tpr)))
-    lw = 2
-    plt.plot(fpr, tpr, color=colors[n],
-             lw=lw, label='ROC curve {}'.format(names[n]))
-plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
-plt.xlim([0.0, 1.0])
-plt.ylim([0.0, 1.05])
-
-plt.yticks([i/20.0 for i in range(21)])
-plt.xticks([i/20.0 for i in range(21)])
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
-plt.title('Receiver operating characteristic (ROC) Curve')
-plt.legend(loc="lower right")
-plt.show()
+clf = svm.SVC(kernel='linear',C=1)
+scores = cross_val_score(clf, X, y, cv=5)
+scores.mean()
+clf.fit(xTrain,yTrain)
+pred = clf.predict(xTest)
+confusion_matrix(yTest,pred)
+accuracy_score(yTest,pred)
+f1_score(yTest,pred)
+recall_score(yTest,pred)
+precision_score(yTest,pred)
