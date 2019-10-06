@@ -75,3 +75,47 @@ for i in range(len(test)):
         ls1.append(test[i])
     if test[i+1] = True and '2019' in test[i+i]:
         ls1.append(test[i])
+
+
+### Rotten tomatoes json
+
+url = 'https://www.rottentomatoes.com/api/private/v2.0/browse?maxTomato=100&services=amazon%3Bhbo_go%3Bitunes%3Bnetflix_iw%3Bvudu%3Bamazon_prime%3Bfandango_now&certified=false&sortBy=popularity&type=opening'
+
+response = requests.get(url)
+
+data = response.json()
+
+rotten = pd.DataFrame(data['results'])
+rotten.columns
+rotten = rotten[['tomatoIcon','title','theaterReleaseDate']]
+rotten.head()
+for i, label in rotten.iterrows():
+    if rotten['tomatoIcon'][i] == 'certified_fresh' or rotten['tomatoIcon'][i] == 'fresh':
+        rotten['tomatoIcon'][i] = 1
+    if rotten['tomatoIcon'][i] == 'rotten':
+        rotten['tomatoIcon'][i] = 0
+
+rotten.head()
+
+rotten['theaterReleaseDate'] = rotten['theaterReleaseDate'].apply(lambda x: x.replace('Oct ','2019-10-'))
+rotten['theaterReleaseDate'] = rotten['theaterReleaseDate'].apply(lambda x: x.replace('Sep ','2019-10-'))
+oct_df
+
+rotten
+rt_list1 = []
+for n in rotten['theaterReleaseDate']:
+    rt_list1.append(n)
+rt_list2 = []
+for n in rotten['title']:
+    rt_list2.append(n)
+rt_list3 = []
+for n in rotten['tomatoIcon']:
+    rt_list3.append(n)
+len(rt_list3)
+rt_list3.remove(rt_list3[6])
+
+rt_zipped = list(zip(rt_list2,rt_list1))
+rt_zipped
+pd.to_datetime(rotten['theaterReleaseDate']
+for x in rotten['theaterReleaseDate']:
+    print(x)

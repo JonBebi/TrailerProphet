@@ -2,24 +2,32 @@ from sklearn.cluster import AgglomerativeClustering, KMeans
 from sklearn.neighbors import KernelDensity
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
-from numpy import argmax
-import numpy as np
-from sklearn.preprocessing import LabelEncoder
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.cluster import KMeans
+from sklearn.metrics import roc_auc_score, roc_curve, auc, accuracy_score,recall_score,f1_score,precision_score,confusion_matrix
+from sklearn.linear_model import LogisticRegression
 
 
-# define example
-data = x2['movie']
-values = np.array(data)
-print(values)
-# integer encode
-label_encoder = LabelEncoder()
-integer_encoded = label_encoder.fit_transform(values)
-print(integer_encoded)
+
+###### train_test_split #####
+y = df['freshness']
+X = df.drop(columns=['rt_score','freshness','movie','total_likes','total_replies','total_retweets'])
+X_scaled = StandardScaler().fit_transform(merged_df.drop(columns=['movie']))
+# y = df['rt_scores']
+# X = df.drop(columns=['tweet','rt_scores','movie','reply_to','retweet_date'])
+xTrain,xTest,yTrain,yTest = train_test_split(X,y,test_size=.5,random_state=3)
+
+### Encoding for movies but saving for genres in the future
+# data = merged_df['movie']
+# values = np.array(data)
+# print(values)
+# # integer encode
+# label_encoder = LabelEncoder()
+# integer_encoded = label_encoder.fit_transform(values)
+# print(integer_encoded)
 
 ########################################
-test = df[['score','rt_scores']]
-
+test = merged_df[['avg_sentiment','freshness']]
+merged_df.columns
 kmeans = KMeans(n_clusters=5).fit(test)
 centroids = kmeans.cluster_centers_
 print(centroids)
