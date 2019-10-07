@@ -38,43 +38,26 @@ merged_df = merged_df[merged_df['total_likes'] != 0]
 ## Dropping movies with less than 30 tweets
 merged_df = merged_df[merged_df['total_tweets'] > 30]
 merged_df.corr()
-
+merged_df['freshness']
+merged_df = merged_df[merged_df['freshness']!= "NA"]
 
 from sklearn.decomposition import PCA
 pca = PCA(n_components=3)
-pca_data = pca.fit_transform(X)
+pca_data = pca.fit_transform(X_scaled)
 df_pca = pd.DataFrame(data=pca_data,columns=['PC1','PC2','PC3'])
-result_df = pd.concat([df_pca, y],axis=1)
+result_df = pd.concat([df_pca, y])
 
 import numpy as np
 plt.scatter(pca_data[:,0],pca_data[:,1])
-import numpy as np
-sns.barplot(pca.explained_variance_ratio_,merged_df.columns)
+pca.explained_variance_ratio_
+
 plt.plot(np.cumsum(pca.explained_variance_ratio_))
 
-score_rt = []
-for m in tqdm(merged_df['movie']):
-    if m in list(rt_dict.keys()):
-        score_rt.append(rt_dict[m])
-    else:
-        score_rt.append(1)
-merged_df['freshness'] = score_rt
-merged_df.corr()
 
-
-merged_df[merged_df['avg_sentiment']!=0].drop(columns=['total_likes','total_replies','total_retweets']).sort_values(by='total_tweets')
-
-merged_df.corr()
-merged_df.corr()
-df.columns
-merged_df[merged_df['like_percent']<20].plot.scatter(x='avg_sentiment',y='freshness')
-
-
-merged_df.head()
 #########################
 ## Logistic Regression ##
 #########################
-lr = LogisticRegression(class_weight='balanced',random_state=5)
+lr = LogisticRegression(class_weight='balanced',random_state=5,)
 lr.fit(xTrain,yTrain)
 y_pred = lr.predict(x_oct)
 
